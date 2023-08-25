@@ -1,14 +1,23 @@
 import { ContactItem } from 'components/ContactItem/ContactItem';
 import { useSelector, useDispatch } from 'react-redux';
-import { deleteContact } from 'redux/contactsSlice';
-import { getContacts, getFilter } from 'redux/selectors';
+import { deleteContact, getContacts } from 'redux/operations';
+import {
+  getContactsList,
+  getFilter,
+  getIsLoading,
+  getError,
+} from 'redux/selectors';
 import PropTypes from 'prop-types';
 import { ContactsList } from './ContactList.styled';
+import { Audio } from 'react-loader-spinner';
 
 function ContactList() {
-  const contacts = useSelector(getContacts);
+  const contacts = useSelector(getContactsList);
   const filter = useSelector(getFilter);
+  const isLoading = useSelector(getIsLoading);
+  const error = useSelector(getError);
   const dispatch = useDispatch();
+
   const filteredContacts = () => {
     return contacts.filter(contact => {
       return contact.name.toLowerCase().includes(filter.toLowerCase());
@@ -17,20 +26,33 @@ function ContactList() {
 
   const deleteContacts = id => {
     dispatch(deleteContact(id));
+    dispatch(getContacts());
   };
 
   return (
-    <ContactsList>
-      {filteredContacts().map(({ id, name, number }) => (
-        <ContactItem
-          key={id}
-          id={id}
-          name={name}
-          number={number}
-          onDeleteBtn={() => deleteContacts(id)}
+    <>
+      {isLoading && !error && (
+        <Audio
+          height="80"
+          width="80"
+          radius="9"
+          color="green"
+          ariaLabel="loading"
         />
-      ))}
-    </ContactsList>
+      )}
+      <ContactsList>
+        {!isLoading &&
+          filteredContacts().map(({ id, name, number }) => (
+            <ContactItem
+              key={id}
+              id={id}
+              name={name}
+              number={number}
+              onDeleteBtn={() => deleteContacts(id)}
+            />
+          ))}
+      </ContactsList>
+    </>
   );
 }
 

@@ -1,14 +1,13 @@
 import { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { getContacts } from 'redux/selectors';
-import { addContact } from 'redux/contactsSlice';
-import { nanoid } from '@reduxjs/toolkit';
+import { getContacts, addContact } from '../../redux/operations';
+import { getContactsList } from 'redux/selectors';
 import {PhonebookForm, PhonebookLabel, PhonebookInput, PhonebookBtn} from './ContactForm.styled'
 
 function ContactForm() {
   const [name, setName] = useState('');
   const [number, setNumber] = useState('');
-  const contacts = useSelector(getContacts);
+  const contacts = useSelector(getContactsList);
   const dispatch = useDispatch();
 
   const addContacts = (name, number) => {
@@ -16,15 +15,14 @@ function ContactForm() {
     const currentName = name;
     const currentNumber = number;
     if (!allNames.includes(currentName)) {
-      const randomId = nanoid();
-
       dispatch(
         addContact({
           name: currentName,
-          id: randomId,
+
           number: currentNumber,
         })
       );
+      dispatch(getContacts());
     } else {
       alert(`${currentName} already added!  `);
     }
